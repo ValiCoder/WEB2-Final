@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .columns { display:flex; gap:24px; }
+    .panel { flex:1; border:1px solid #ddd; padding:12px; border-radius:6px; }
+    table { width:100%; border-collapse:collapse; }
+    th,td { padding:8px; border-bottom:1px solid #eee; text-align:left }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Dashboard</h1>
+    <p id="who"></p>
+    <div class="columns">
+      <div class="panel">
+        <h2>Users</h2>
+        <div id="usersArea">Loading...</div>
+      </div>
+      <div class="panel">
+        <h2>Courses</h2>
+        <div id="coursesArea">Loading...</div>
+        <div id="createCourseArea"></div>
+      </div>
+    </div>
+    <p><a href="/user">My profile</a> — <a href="/logout">Logout</a></p>
+  </div>
+
+  <script>
+    async function load() {
+      const whoEl = document.getElementById('who');
+      const usersArea = document.getElementById('usersArea');
+      const coursesArea = document.getElementById('coursesArea');
+
+      // get current user
+      const meRes = await fetch('/api/me');
+      if (!meRes.ok) {
+        window.location = '/login';
+        return;
+      }
+      const me = await meRes.json();
+      whoEl.textContent = `Signed in as ${me.name} (${me.email}) — role: ${me.role}`;
+
+      // fetch users (may be forbidden for non-admin)
+      const usersRes = await fetch('/api/users');
+      if (usersRes.ok) {
+        const users = await usersRes.json();
+        usersArea.innerHTML = renderUsers(users);
+      } else if (usersRes.status === 403) {
+        usersArea.innerHTML = '<p class="error">You do not have permission to view all users.</p>';
+      } else {
+        usersArea.innerHTML = '<p class="error">Error loading users</p>';
+      }
+
+      // fetch courses
+      const coursesRes = await fetch('/api/courses');
+      if (coursesRes.ok) {
+        const courses = await coursesRes.json();
+        coursesArea.innerHTML = renderCourses(courses, me);
+      } else {
+        coursesArea.innerHTML = '<p class="error">Error loading courses</p>';
+      }
+
+      // show course creation form for teachers/admins
+      const createArea = document.getElementById('createCourseArea');
+      if (me.role === 'teacher' || me.role === 'admin') {
+        createArea.innerHTML = `
+          <hr>
+          <h3>Create Course</h3>
+          <form id="createCourseForm">
+            <div><input name="name" placeholder="Course name" required></div>
+            <div><input name="topic" placeholder="Topic"></div>
+            <div><button type="submit">Create</button></div>
+          </form>
+          <div id="createResult"></div>
+        `;
+        document.getElementById('createCourseForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const fd = new FormData(e.target);
+          const body = { name: fd.get('name'), topic: fd.get('topic') };
+          const r = await fetch('/api/courses', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+          const res = document.getElementById('createResult');
+          if (r.ok) { res.innerHTML = '<p>Course created.</p>'; e.target.reset(); load(); } else { res.innerHTML = '<p class="error">Failed to create</p>'; }
+        });
+      } else {
+        createArea.innerHTML = '';
+      }
+    }
+
+    function renderUsers(users) {
+      if (!users || users.length === 0) return '<p>No users found.</p>';
+      return `
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
+          <tbody>
+            ${users.map(u => `<tr><td>${escape(u.name)}</td><td>${escape(u.email)}</td><td>${escape(u.role||'user')}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderCourses(courses, me) {
+      if (!courses || courses.length === 0) return '<p>No courses found.</p>';
+      return `
+        <table>
+          <thead><tr><th>Name</th><th>Topic</th><th>Owner</th><th>Actions</th></tr></thead>
+          <tbody>
+            ${courses.map(c => `
+              <tr>
+                <td>${escape(c.name)}</td>
+                <td>${escape(c.topic||'')}</td>
+                <td>${escape((c.owner && (c.owner.name || c.owner.email)) || c.owner)}</td>
+                <td>${canEdit(c, me) ? `<button onclick="editCourse('${c.id}')">Edit</button> <button onclick="deleteCourse('${c.id}')">Delete</button>` : 'N/A'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function canEdit(course, me) {
+      return me.role === 'admin' || (course.owner && String(course.owner._id || course.owner.id) === String(me.id));
+    }
+
+    async function editCourse(courseId) {
+      const coursesRes = await fetch('/api/courses');
+      const courses = await coursesRes.json();
+      const course = courses.find(c => c.id === courseId);
+      if (!course) return alert('Course not found');
+      const name = prompt('Course name:', course.name);
+      if (name === null) return;
+      const topic = prompt('Topic:', course.topic || '');
+      const r = await fetch(`/api/courses/${courseId}`, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({name, topic})
+      });
+      if (r.ok) { alert('Updated'); load(); } else { alert('Failed'); }
+    }
+
+    async function deleteCourse(courseId) {
+      if (!confirm('Delete this course?')) return;
+      const r = await fetch(`/api/courses/${courseId}`, { method: 'DELETE' });
+      if (r.ok) { alert('Deleted'); load(); } else { alert('Failed'); }
+    }
+
+    window.editCourse = editCourse;
+    window.deleteCourse = deleteCourse;
+
+    function escape(s){ return String(s||'').replace(/[&<>"']/g, function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[ch];}); }
+
+    load().catch(err=>{
+      console.error(err);
+      document.getElementById('usersArea').innerHTML = '<p class="error">Unexpected error</p>';
+      document.getElementById('coursesArea').innerHTML = '<p class="error">Unexpected error</p>';
+    });
+  </script>
+</body>
+</html>

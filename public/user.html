@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>User Profile</h1>
+        <div id="userData">
+            <!-- User data will be dynamically inserted here -->
+        </div>
+                <p>
+                    <a href="/dashboard">Dashboard</a> |
+                    <a href="/">Home</a> |
+                    <a href="/logout" class="logout-link">Logout</a>
+                </p>
+    </div>
+    
+    <script>
+        // Read user id from query string and fetch REST API
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get('id');
+
+        const container = document.getElementById('userData');
+
+        if (!userId) {
+            container.innerHTML = '<p class="error">No user id provided.</p>';
+        } else {
+            fetch(`/api/users/${userId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch user');
+                    return response.json();
+                })
+                .then(data => {
+                    container.innerHTML = `
+                        <h2>${data.name}</h2>
+                        <p><strong>Email:</strong> ${data.email}</p>
+                        <p><strong>ID:</strong> ${data.id}</p>
+                    `;
+                })
+                .catch(err => {
+                    container.innerHTML = '<p class="error">Error loading user data</p>';
+                });
+        }
+    </script>
+</body>
+</html>

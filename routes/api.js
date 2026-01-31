@@ -1,0 +1,140 @@
+const express = require('express');
+const router = express.Router();
+const bcrypt = require('bcryptjs');
+
+const User = require('../models/user');
+const Course = require('../models/course');
+const ensureAuth = require('../middleware/auth');
+
+function isAdmin(req) {
+    return req.user && req.user.role === 'admin';
+}
+
+// --- Users CRUD ---
+// GET /api/users - admin only: list users
+router.get('/users', ensureAuth, async (req, res) => {
+    try {
+        if (!isAdmin(req)) return res.status(403).json({ error: 'Forbidden' });
+        const users = await User.find().select('-password');
+        res.json(users.map(u => ({ id: u._id, name: u.name, email: u.email, role: u.role })));
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/users/:id - admin or owner
+router.get('/users/:id', ensureAuth, async (req, res) => {
+    try {
+        if (!isAdmin(req) && String(req.user._id) !== String(req.params.id)) return res.status(403).json({ error: 'Forbidden' });
+        const user = await User.findById(req.params.id).select('-password');
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.json({ id: user._id, name: user.name, email: user.email, role: user.role });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/users - admin creates user
+router.post('/users', ensureAuth, async (req, res) => {
+    try {
+        if (!isAdmin(req)) return res.status(403).json({ error: 'Forbidden' });
+        const { name, email, password, role } = req.body;
+        const existing = await User.findOne({ email });
+        if (existing) return res.status(400).json({ error: 'Email already in use' });
+        const hashed = await bcrypt.hash(password || 'changeme', 10);
+        const user = new User({ name, email, password: hashed, role: role || 'user' });
+        await user.save();
+        res.status(201).json({ id: user._id, name: user.name, email: user.email, role: user.role });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// PUT /api/users/:id - update (admin or owner). Only admin may change role
+router.put('/users/:id', ensureAuth, async (req, res) => {
+    try {
+        const targetId = String(req.params.id);
+        if (!isAdmin(req) && String(req.user._id) !== targetId) return res.status(403).json({ error: 'Forbidden' });
+        const updates = {};
+        const { name, email, password, role } = req.body;
+        if (name) updates.name = name;
+        if (email) updates.email = email;
+        if (password) updates.password = await bcrypt.hash(password, 10);
+        if (role && isAdmin(req)) updates.role = role;
+        const user = await User.findByIdAndUpdate(targetId, updates, { new: true }).select('-password');
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.json({ id: user._id, name: user.name, email: user.email, role: user.role });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// DELETE /api/users/:id - admin or owner (owner can delete themselves)
+router.delete('/users/:id', ensureAuth, async (req, res) => {
+    try {
+        const targetId = String(req.params.id);
+        if (!isAdmin(req) && String(req.user._id) !== targetId) return res.status(403).json({ error: 'Forbidden' });
+        await User.findByIdAndDelete(targetId);
+        // optionally delete courses owned by user
+        await Course.deleteMany({ owner: targetId });
+        res.json({ ok: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// --- Courses CRUD ---
+// GET /api/courses - admin: all, user: own courses
+router.get('/courses', ensureAuth, async (req, res) => {
+    try {
+        let docs;
+        if (isAdmin(req)) docs = await Course.find().populate('owner', 'name email');
+        else docs = await Course.find({ owner: req.user._id }).populate('owner', 'name email');
+        res.json(docs.map(c => ({ id: c._id, name: c.name, topic: c.topic, owner: c.owner }))); 
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/courses/:id - admin or owner
+router.get('/courses/:id', ensureAuth, async (req, res) => {
+    try {
+        const course = await Course.findById(req.params.id).populate('owner', 'name email');
+        if (!course) return res.status(404).json({ error: 'Course not found' });
+        if (!isAdmin(req) && String(course.owner._id) !== String(req.user._id)) return res.status(403).json({ error: 'Forbidden' });
+        res.json({ id: course._id, name: course.name, topic: course.topic, owner: course.owner });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/courses - create course (owner defaults to current user, admin may set ownerId)
+router.post('/courses', ensureAuth, async (req, res) => {
+    try {
+        const { name, topic, ownerId } = req.body;
+        const owner = isAdmin(req) && ownerId ? ownerId : req.user._id;
+        const course = new Course({ name, topic, owner });
+        await course.save();
+        res.status(201).json({ id: course._id, name: course.name, topic: course.topic, owner: course.owner });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// PUT /api/courses/:id - update (admin or owner)
+router.put('/courses/:id', ensureAuth, async (req, res) => {
+    try {
+        const course = await Course.findById(req.params.id);
+        if (!course) return res.status(404).json({ error: 'Course not found' });
+        if (!isAdmin(req) && String(course.owner) !== String(req.user._id)) return res.status(403).json({ error: 'Forbidden' });
+        const { name, topic } = req.body;
+        if (name) course.name = name;
+        if (topic) course.topic = topic;
+        await course.save();
+        res.json({ id: course._id, name: course.name, topic: course.topic, owner: course.owner });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// DELETE /api/courses/:id - admin or owner
+router.delete('/courses/:id', ensureAuth, async (req, res) => {
+    try {
+        const course = await Course.findById(req.params.id);
+        if (!course) return res.status(404).json({ error: 'Course not found' });
+        if (!isAdmin(req) && String(course.owner) !== String(req.user._id)) return res.status(403).json({ error: 'Forbidden' });
+        await course.remove();
+        res.json({ ok: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+module.exports = router;
+
+// GET /api/me - return current logged-in user (without password)
+router.get('/me', ensureAuth, (req, res) => {
+    if (!req.user) return res.status(404).json({ error: 'No user attached' });
+    res.json({ id: req.user._id, name: req.user.name, email: req.user.email, role: req.user.role });
+});
+
