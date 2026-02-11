@@ -85,6 +85,95 @@ router.get('/courses', ensureAuth, async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// GET /api/my-courses - teacher/admin: own (admin all), learner: enrolled
+router.get('/my-courses', ensureAuth, async (req, res) => {
+    try {
+        console.log('GET /api/my-courses - User:', req.user.email, 'Role:', req.user.role);
+        
+        let docs;
+        if (req.user.role === 'learner') {
+            docs = await Course.find({ students: req.user._id }).populate('owner', 'name email');
+        } else if (isAdmin(req)) {
+            docs = await Course.find().populate('owner', 'name email');
+        } else {
+            docs = await Course.find({ owner: req.user._id }).populate('owner', 'name email');
+        }
+        
+        console.log('Found courses:', docs.length);
+        
+        // Fetch lessons for each course
+        const coursesWithLessons = await Promise.all(docs.map(async (c) => {
+            const lessons = await Lesson.find({ course: c._id }).sort('order');
+            return {
+                id: c._id,  // Changed from _id to id for consistency
+                _id: c._id,  // Keep both for compatibility
+                name: c.name,
+                topic: c.topic,
+                owner: c.owner,
+                students: c.students,
+                lessons: lessons
+            };
+        }));
+        
+        console.log('Returning courses with lessons:', JSON.stringify(coursesWithLessons, null, 2));
+        
+        res.json(coursesWithLessons);
+    } catch (err) { 
+        console.error('Error in /api/my-courses:', err);
+        res.status(500).json({ error: err.message }); 
+    }
+});
+
+// --- Public Catalog ---
+// GET /api/catalog/courses - list all courses (public)
+router.get('/catalog/courses', async (req, res) => {
+    try {
+        const courses = await Course.find().populate('owner', 'name email');
+        res.json(courses.map(c => ({
+            id: c._id,
+            name: c.name,
+            topic: c.topic,
+            owner: c.owner
+        })));
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/catalog/courses/:id - course with lessons (public shows only published, owner sees all)
+router.get('/catalog/courses/:id', async (req, res) => {
+    try {
+        const course = await Course.findById(req.params.id).populate('owner', 'name email');
+        if (!course) return res.status(404).json({ error: 'Course not found' });
+        
+        // Check if user is owner or admin
+        const isOwner = req.user && (String(req.user._id) === String(course.owner._id) || req.user.role === 'admin');
+        
+        // Check if user is enrolled
+        const isEnrolled = req.user && (course.students || []).some(id => String(id) === String(req.user._id));
+        
+        // If owner/admin, show all lessons. Otherwise only published
+        const lessonFilter = isOwner ? { course: course._id } : { course: course._id, isPublished: true };
+        const lessons = await Lesson.find(lessonFilter).sort('order');
+        
+        res.json({
+            id: course._id,
+            name: course.name,
+            topic: course.topic,
+            owner: course.owner,
+            isEnrolled: isEnrolled,
+            lessons: lessons.map(l => ({
+                id: l._id,
+                title: l.title,
+                type: l.type,
+                order: l.order,
+                duration: l.duration,
+                videoUrl: l.videoUrl,
+                attachments: l.attachments,
+                isPublished: l.isPublished
+            }))
+        });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // GET /api/courses/:id - admin or owner
 router.get('/courses/:id', ensureAuth, async (req, res) => {
     try {
@@ -92,6 +181,17 @@ router.get('/courses/:id', ensureAuth, async (req, res) => {
         if (!course) return res.status(404).json({ error: 'Course not found' });
         if (!isAdmin(req) && String(course.owner._id) !== String(req.user._id)) return res.status(403).json({ error: 'Forbidden' });
         res.json({ id: course._id, name: course.name, topic: course.topic, owner: course.owner });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/courses/:id/students - owner/admin only
+router.get('/courses/:id/students', ensureAuth, async (req, res) => {
+    try {
+        const course = await Course.findById(req.params.id).populate('students', 'name email');
+        if (!course) return res.status(404).json({ error: 'Course not found' });
+        if (!isAdmin(req) && String(course.owner) !== String(req.user._id)) return res.status(403).json({ error: 'Forbidden' });
+        const students = (course.students || []).map(s => ({ id: s._id, name: s.name, email: s.email }));
+        res.json(students);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -103,6 +203,21 @@ router.post('/courses', ensureAuth, async (req, res) => {
         const course = new Course({ name, topic, owner });
         await course.save();
         res.status(201).json({ id: course._id, name: course.name, topic: course.topic, owner: course.owner });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/courses/:id/enroll - learner enrolls into course
+router.post('/courses/:id/enroll', ensureAuth, async (req, res) => {
+    try {
+        if (req.user.role !== 'learner') return res.status(403).json({ error: 'Forbidden' });
+        const course = await Course.findById(req.params.id);
+        if (!course) return res.status(404).json({ error: 'Course not found' });
+        const already = (course.students || []).some(id => String(id) === String(req.user._id));
+        if (!already) {
+            course.students.push(req.user._id);
+            await course.save();
+        }
+        res.json({ ok: true });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -203,6 +318,6 @@ router.delete('/lessons/:id', ensureAuth, async (req, res) => {
 // GET /api/me - return current logged-in user (without password)
 router.get('/me', ensureAuth, (req, res) => {
     if (!req.user) return res.status(404).json({ error: 'No user attached' });
-    res.json({ id: req.user._id, name: req.user.name, email: req.user.email, role: req.user.role });
+    res.json({ id: req.user._id, name: req.user.name, email: req.user.email, role: req.user.role, createdAt: req.user.createdAt });
 });
 

@@ -33,6 +33,9 @@
                         <li class="nav-item">
                             <a class="nav-link" href="profile.html">Profile</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logout">Logout</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -40,93 +43,26 @@
     </header>
 
     <main class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>Web Development Fundamentals</h2>
-            <div class="progress" style="width: 200px;">
-                <div class="progress-bar" role="progressbar" style="width: 30%">30% Complete</div>
+        <div class="mb-4">
+            <h2>My Learning</h2>
+            <p class="text-muted">Courses you are enrolled in</p>
+        </div>
+        
+        <div id="loadingMessage" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
         </div>
         
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Course Content</h5>
-                    </div>
-                    <div class="list-group list-group-flush" id="lectureList">
-                        <a href="#" class="list-group-item list-group-item-action active" data-lecture="1">
-                            <div class="d-flex w-100 justify-content-between">
-                                <span>Introduction to HTML</span>
-                                <small><i class="bi bi-check-circle-fill text-success"></i></small>
-                            </div>
-                        </a>
-                        <a href="#" class="list-group-item list-group-item-action" data-lecture="2">
-                            <div class="d-flex w-100 justify-content-between">
-                                <span>CSS Basics</span>
-                                <small><i class="bi bi-circle"></i></small>
-                            </div>
-                        </a>
-                        <a href="#" class="list-group-item list-group-item-action" data-lecture="3">
-                            <div class="d-flex w-100 justify-content-between">
-                                <span>JavaScript Fundamentals</span>
-                                <small><i class="bi bi-circle"></i></small>
-                            </div>
-                        </a>
-                        <a href="#" class="list-group-item list-group-item-action" data-lecture="4">
-                            <div class="d-flex w-100 justify-content-between">
-                                <span>Responsive Design</span>
-                                <small><i class="bi bi-circle"></i></small>
-                            </div>
-                        </a>
-                        <a href="#" class="list-group-item list-group-item-action" data-lecture="5">
-                            <div class="d-flex w-100 justify-content-between">
-                                <span>Project: Personal Portfolio</span>
-                                <small><i class="bi bi-circle"></i></small>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-8">
-                <div class="card lecture-content">
-                    <div class="card-body">
-                        <h4 class="card-title" id="lectureTitle">Introduction to HTML</h4>
-                        <div id="lectureContent">
-                            <p>HTML (HyperText Markup Language) is the standard markup language for documents designed to be displayed in a web browser.</p>
-                            
-                            <h5>Basic HTML Structure</h5>
-                            <pre><code>&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-&lt;head&gt;
-    &lt;title&gt;Page Title&lt;/title&gt;
-&lt;/head&gt;
-&lt;body&gt;
-    &lt;h1&gt;My First Heading&lt;/h1&gt;
-    &lt;p&gt;My first paragraph.&lt;/p&gt;
-&lt;/body&gt;
-&lt;/html&gt;</code></pre>
-                            
-                            <h5>Common HTML Elements</h5>
-                            <ul>
-                                <li><strong>&lt;h1&gt; to &lt;h6&gt;</strong>: Headings</li>
-                                <li><strong>&lt;p&gt;</strong>: Paragraphs</li>
-                                <li><strong>&lt;a&gt;</strong>: Links</li>
-                                <li><strong>&lt;img&gt;</strong>: Images</li>
-                                <li><strong>&lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;</strong>: Lists</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="d-flex justify-content-between mt-4">
-                            <button class="btn btn-secondary" id="prevLecture">Previous</button>
-                            <div>
-                                <button class="btn btn-outline-primary me-2" id="markComplete">Mark Complete</button>
-                                <a href="quiz.html" class="btn btn-primary">Take Quiz</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div id="errorMessage" class="alert alert-danger d-none" role="alert"></div>
+        
+        <div id="noCourses" class="text-center py-5 d-none">
+            <h4>No courses yet</h4>
+            <p class="text-muted">You haven't enrolled in any courses. Check out our <a href="courses.html">course catalog</a>!</p>
+        </div>
+        
+        <div id="coursesList" class="row g-4">
+            <!-- Courses will be dynamically loaded here -->
         </div>
     </main>
 

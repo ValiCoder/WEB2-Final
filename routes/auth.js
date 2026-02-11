@@ -26,6 +26,10 @@ router.get('/dashboard', ensureAuth, (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public', 'dashboard.html'));
 });
 
+router.get('/course', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'course.html'));
+});
+
 // Register
 router.post('/register', async (req, res) => {
     try {
@@ -42,7 +46,10 @@ router.post('/register', async (req, res) => {
         const assignedRole = allowed.includes(role) ? role : 'learner';
         const newUser = new User({ name, email, password: hashed, role: assignedRole });
         await newUser.save();
-        res.send('Registration successful! <a href="/login">Login now</a>');
+        
+        // Auto-login: create session and redirect to home
+        req.session.userId = String(newUser._id);
+        res.redirect('/');
     } catch (err) {
         res.send('Server error: ' + err.message);
     }
@@ -82,7 +89,7 @@ router.post('/login', async (req, res) => {
 
         // create session
         req.session.userId = String(user._id);
-        res.redirect('/user?id=' + user._id);
+        res.redirect('/');
 
     } catch (err) {
         res.send('Server error: ' + err.message);

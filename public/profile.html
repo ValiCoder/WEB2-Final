@@ -33,6 +33,9 @@
                         <li class="nav-item">
                             <a class="nav-link active" href="profile.html">Profile</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/logout">Logout</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -41,21 +44,20 @@
 
     <main class="container">
         <h2 class="mb-4">User Profile</h2>
-        
+
         <div class="row">
             <div class="col-md-4">
                 <div class="card text-center">
                     <div class="card-body">
                         <div class="user-avatar-container mb-3">
                             <img src="https://via.placeholder.com/150" alt="User Avatar" class="user-avatar" id="userAvatar">
-                            <button class="btn btn-sm btn-outline-primary change-avatar-btn" id="changeAvatarBtn">Change</button>
                         </div>
-                        <h5 class="card-title" id="userName">John Doe</h5>
-                        <p class="card-text" id="userTitle">Student</p>
-                        <p class="card-text"><small class="text-muted">Member since: <span id="memberSince">January 2023</span></small></p>
+                        <h5 class="card-title" id="userName">Loading...</h5>
+                        <p class="card-text" id="userRole">Role</p>
+                        <p class="card-text"><small class="text-muted">Member since: <span id="memberSince">-</span></small></p>
                     </div>
                 </div>
-                
+
                 <div class="card mt-4">
                     <div class="card-body">
                         <h5 class="card-title">Account Settings</h5>
@@ -66,17 +68,17 @@
                             <li class="list-group-item">
                                 <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</a>
                             </li>
-                            <li class="list-group-item">
-                                <a href="#" class="text-decoration-none">Notification Settings</a>
-                            </li>
-                            <li class="list-group-item">
-                                <a href="#" class="text-decoration-none">Privacy Settings</a>
+                            <li class="list-group-item d-none" id="adminUsersItem">
+                                <a href="/admin/users" class="text-decoration-none">Admin: Users</a>
                             </li>
                         </ul>
+                        <div class="mt-3">
+                            <button class="btn btn-danger w-100" id="deleteAccountBtn">Delete My Account</button>
+                        </div>
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-body">
@@ -86,7 +88,7 @@
                                 <strong>Full Name:</strong>
                             </div>
                             <div class="col-sm-9" id="displayName">
-                                John Doe
+                                -
                             </div>
                         </div>
                         <div class="row mb-3">
@@ -94,58 +96,50 @@
                                 <strong>Email:</strong>
                             </div>
                             <div class="col-sm-9" id="displayEmail">
-                                john.doe@example.com
+                                -
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-sm-3">
-                                <strong>Bio:</strong>
+                                <strong>Role:</strong>
                             </div>
-                            <div class="col-sm-9" id="displayBio">
-                                I'm a passionate learner interested in web development and data science.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card mt-4">
-                    <div class="card-body">
-                        <h5 class="card-title">Learning Progress</h5>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between">
-                                <h6>Web Development Fundamentals</h6>
-                                <span>0%</span>
-                            </div>
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: 30%"></div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between">
-                                <h6>Data Science Essentials</h6>
-                                <span>0%</span>
-                            </div>
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: 65%"></div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between">
-                                <h6>Digital Marketing</h6>
-                                <span>0%</span>
-                            </div>
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            <div class="col-sm-9" id="displayRole">
+                                -
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <div class="card mt-4">
+
+                <div class="card mt-4" id="courseManagement">
                     <div class="card-body">
-                        <h5 class="card-title">Certificates</h5>
-                        <div class="alert alert-info">
-                            You haven't earned any certificates yet. Complete a course to earn your first certificate!
+                        <h5 class="card-title">Manage Courses</h5>
+                        <form id="createCourseForm" class="row g-2 align-items-end">
+                            <div class="col-md-5">
+                                <label for="courseName" class="form-label">Course Name</label>
+                                <input type="text" class="form-control" id="courseName" required>
+                            </div>
+                            <div class="col-md-5">
+                                <label for="courseTopic" class="form-label">Topic</label>
+                                <input type="text" class="form-control" id="courseTopic" required>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">Add</button>
+                            </div>
+                        </form>
+
+                        <div class="mt-4" id="courseList"></div>
+                        <div class="alert alert-info d-none" id="courseListEmpty">
+                            No courses yet. Create your first course above.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4 d-none" id="enrolledCourses">
+                    <div class="card-body">
+                        <h5 class="card-title">My Enrolled Courses</h5>
+                        <div id="enrolledList"></div>
+                        <div class="alert alert-info d-none" id="enrolledEmpty">
+                            You are not enrolled in any courses yet.
                         </div>
                     </div>
                 </div>
@@ -163,24 +157,12 @@
                 <div class="modal-body">
                     <form id="editProfileForm">
                         <div class="mb-3">
-                            <label for="firstName" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="firstName" value="John" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="lastName" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="lastName" value="Doe" required>
+                            <label for="fullName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="fullName" required>
                         </div>
                         <div class="mb-3">
                             <label for="email" class="form-label">Email Address</label>
-                            <input type="email" class="form-control" id="email" value="john.doe@example.com" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="title" class="form-label">Title</label>
-                            <input type="text" class="form-control" id="title" value="Student">
-                        </div>
-                        <div class="mb-3">
-                            <label for="bio" class="form-label">Bio</label>
-                            <textarea class="form-control" id="bio" rows="3">I'm a passionate learner interested in web development and data science.</textarea>
+                            <input type="email" class="form-control" id="email" required>
                         </div>
                     </form>
                 </div>

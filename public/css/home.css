@@ -34,7 +34,3 @@
 .carousel-control-next-icon {
     filter: invert(var(--icon-filter, 0));
 }
-
-[data-theme="dark"] {
-    --icon-filter: 1;
-}

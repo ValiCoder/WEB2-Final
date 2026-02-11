@@ -1,3 +1,8 @@
+//Добавить интерфейс курса (САМОГО КУРСА А НЕ ЛЕКЦИЙ)
+//Юзер может быть студентом или преподавателем, в зависимости от роли показывать разные страницы (для преподавателя - возможность создавать курсы и лекции, для студента - только просматривать)
+//Со страницы юзера просмотр всех курсов и при нажатии кнопки записаться он добавляется к этому курсу (в БД сохраняется связь между юзером и курсом)
+
+
 const express = require('express');
 const path = require('path');
 const { connectDB } = require('./db');
@@ -10,6 +15,7 @@ const apiRoutes = require('./routes/api');
 const logger = require('./middleware/logger');
 const errorHandler = require('./middleware/errorHandler');
 const attachUser = require('./middleware/attachUser');
+const ensureAuth = require('./middleware/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,6 +44,11 @@ app.use(
 app.use('/', authRoutes);
 // attach user (reads session and sets req.user)
 app.use(attachUser);
+// admin-only users page
+app.get('/admin/users', ensureAuth, (req, res) => {
+    if (!req.user || req.user.role !== 'admin') return res.status(403).send('Forbidden');
+    res.sendFile(path.join(__dirname, 'public', 'admin-users.html'));
+});
 app.use('/api', apiRoutes);
 
 // error handling (after routes)

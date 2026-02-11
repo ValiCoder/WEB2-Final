@@ -33,6 +33,15 @@
                         <li class="nav-item">
                             <a class="nav-link" href="profile.html">Profile</a>
                         </li>
+                        <li class="nav-item" id="loginNavItem">
+                            <a class="nav-link" href="/login">Login</a>
+                        </li>
+                        <li class="nav-item" id="registerNavItem">
+                            <a class="nav-link" href="/register">Register</a>
+                        </li>
+                        <li class="nav-item d-none" id="logoutNavItem">
+                            <a class="nav-link" href="/logout">Logout</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -43,7 +52,10 @@
         <div class="hero-section text-center">
             <h1 class="display-4">Welcome to LearniX</h1>
             <p class="lead">Your gateway to knowledge and skill development</p>
-            <a href="courses.html" class="btn btn-primary btn-lg mt-3">Browse Courses</a>
+            <div class="mt-3">
+                <a href="courses.html" class="btn btn-primary btn-lg">Browse Courses</a>
+                <a href="/register" class="btn btn-outline-light btn-lg ms-2" id="heroRegisterBtn">Get Started</a>
+            </div>
         </div>
         
         <div class="row mt-5">

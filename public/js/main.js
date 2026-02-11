@@ -1,13 +1,11 @@
 class ThemeManager {
     constructor() {
-        this.currentTheme = this.getStoredTheme() || 'light';
+        this.currentTheme = 'dark';
         this.init();
     }
 
     init() {
         this.applyTheme(this.currentTheme);
-        this.createThemeToggle();
-        this.setupEventListeners();
     }
 
     getStoredTheme() {
@@ -55,50 +53,9 @@ class ThemeManager {
     }
 
     applyTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        this.currentTheme = theme;
-        this.setStoredTheme(theme);
-        this.updateThemeToggleIcon();
-    }
-
-    toggleTheme() {
-        const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
-        this.applyTheme(newTheme);
-        window.dispatchEvent(new CustomEvent('themeChanged', { 
-            detail: { theme: newTheme } 
-        }));
-    }
-
-    createThemeToggle() {
-        if (document.getElementById('themeToggle')) return;
-
-        const navbarNav = document.querySelector('.navbar-nav');
-        if (!navbarNav) return;
-
-        const toggleItem = document.createElement('li');
-        toggleItem.className = 'nav-item';
-        toggleItem.innerHTML = `
-            <button class="nav-link theme-toggle" id="themeToggle" title="Toggle theme">
-                <span class="theme-icon">${this.currentTheme === 'light' ? '🌙' : '☀️'}</span>
-            </button>
-        `;
-
-        navbarNav.appendChild(toggleItem);
-    }
-
-    updateThemeToggleIcon() {
-        const themeIcon = document.querySelector('.theme-icon');
-        if (themeIcon) {
-            themeIcon.textContent = this.currentTheme === 'light' ? '🌙' : '☀️';
-        }
-    }
-
-    setupEventListeners() {
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('#themeToggle')) {
-                this.toggleTheme();
-            }
-        });
+        document.documentElement.setAttribute('data-theme', 'dark');
+        this.currentTheme = 'dark';
+        this.setStoredTheme('dark');
     }
 }
 
