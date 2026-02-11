@@ -3,25 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Management System</title>
+    <title>LearniX - Online Learning System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/home.css">
 </head>
 <body>
-    <div class="container">
-        <h1>User Management System</h1>
-        <p style="font-size: 1.2rem; margin: 30px 0;">Manage your account securely</p>
-        <div style="display: flex; gap: 20px; margin-top: 40px;">
-            <a href="/register" style="flex: 1;">
-                <button style="background: linear-gradient(to right, #4CAF50, #45a049);">
-                    Register
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">LearniX</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
                 </button>
-            </a>
-            <a href="/login" style="flex: 1;">
-                <button style="background: linear-gradient(to right, #2196F3, #1976D2);">
-                    Login
-                </button>
-            </a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="courses.html">Courses</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="lectures.html">Lectures</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="quiz.html">Quiz</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="profile.html">Profile</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="hero-section text-center">
+            <h1 class="display-4">Welcome to LearniX</h1>
+            <p class="lead">Your gateway to knowledge and skill development</p>
+            <a href="courses.html" class="btn btn-primary btn-lg mt-3">Browse Courses</a>
         </div>
-    </div>
+        
+        <div class="row mt-5">
+            <div class="col-md-4">
+                <div class="card text-center p-4 feature-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Diverse Courses</h5>
+                        <p class="card-text">Choose from a wide range of subjects and skill levels</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-4 feature-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Expert Instructors</h5>
+                        <p class="card-text">Learn from industry professionals and academics</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center p-4 feature-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Flexible Learning</h5>
+                        <p class="card-text">Study at your own pace, anytime and anywhere</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="testimonialCarousel" class="carousel slide mt-5" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="carousel-content text-center p-4">
+                        <p>"LearniX transformed my career! The courses are well-structured and easy to follow."</p>
+                        <h6>- Sarah Johnson</h6>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="carousel-content text-center p-4">
+                        <p>"I love the flexibility of learning at my own pace while balancing work and family."</p>
+                        <h6>- Michael Chen</h6>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="carousel-content text-center p-4">
+                        <p>"The instructors are knowledgeable and the platform is user-friendly."</p>
+                        <h6>- Emma Rodriguez</h6>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>LearniX</h5>
+                    <p>Your online learning platform for skill development and knowledge enhancement.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="courses.html">Courses</a></li>
+                        <li><a href="profile.html">My Profile</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li>Email: info@learnix.com</li>
+                        <li>Phone: +7 007 000 00 00</li>
+                        <li>Address: Street, City</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p>&copy; 2025 LearniX. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/home.js"></script>
 </body>
 </html>

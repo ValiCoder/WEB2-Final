@@ -25,6 +25,7 @@
         <h2>Courses</h2>
         <div id="coursesArea">Loading...</div>
         <div id="createCourseArea"></div>
+          <div id="lessonsPanel" style="margin-top:32px;"></div>
       </div>
     </div>
     <p><a href="/user">My profile</a> — <a href="/logout">Logout</a></p>
@@ -35,6 +36,10 @@
       const whoEl = document.getElementById('who');
       const usersArea = document.getElementById('usersArea');
       const coursesArea = document.getElementById('coursesArea');
+
+        // lessons panel
+        const lessonsPanel = document.getElementById('lessonsPanel');
+        lessonsPanel.innerHTML = '';
 
       // get current user
       const meRes = await fetch('/api/me');
@@ -61,6 +66,12 @@
       if (coursesRes.ok) {
         const courses = await coursesRes.json();
         coursesArea.innerHTML = renderCourses(courses, me);
+
+          // Добавить обработчик выбора курса для отображения уроков
+          coursesArea.querySelectorAll('tr').forEach((row, idx) => {
+            if (idx === 0) return; // skip header
+            row.addEventListener('click', () => showLessons(courses[idx-1], me));
+          });
       } else {
         coursesArea.innerHTML = '<p class="error">Error loading courses</p>';
       }
@@ -150,6 +161,103 @@
 
     window.editCourse = editCourse;
     window.deleteCourse = deleteCourse;
+
+      async function showLessons(course, me) {
+        lessonsPanel.innerHTML = `<h3>Lessons for: ${escape(course.name)}</h3><div id="lessonsArea">Loading...</div>`;
+        const lessonsArea = document.getElementById('lessonsArea');
+        // fetch lessons
+        const r = await fetch(`/api/lessons?course=${course.id}`);
+        if (!r.ok) { lessonsArea.innerHTML = '<p class="error">Failed to load lessons</p>'; return; }
+        const lessons = await r.json();
+        lessonsArea.innerHTML = renderLessons(lessons, me, course);
+
+        // show lesson creation form for teachers/admins
+        if (me.role === 'teacher' || me.role === 'admin') {
+          lessonsArea.innerHTML += `
+            <hr>
+            <h4>Add Lesson</h4>
+            <form id="createLessonForm">
+              <div><input name="title" placeholder="Lesson title" required></div>
+              <div><textarea name="content" placeholder="Lesson content" required></textarea></div>
+              <div><select name="type">
+                <option value="text">Text</option>
+                <option value="video">Video</option>
+                <option value="document">Document</option>
+                <option value="quiz">Quiz</option>
+              </select></div>
+              <div><input name="order" type="number" min="1" placeholder="Order (1,2...)" required></div>
+              <div><input name="videoUrl" placeholder="Video URL (optional)"></div>
+              <div><input name="attachments" placeholder="Attachments (comma separated URLs)"></div>
+              <div><input name="duration" type="number" min="1" placeholder="Duration (min, optional)"></div>
+              <div><button type="submit">Add Lesson</button></div>
+            </form>
+            <div id="createLessonResult"></div>
+          `;
+          document.getElementById('createLessonForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            const body = {
+              title: fd.get('title'),
+              content: fd.get('content'),
+              type: fd.get('type'),
+              order: Number(fd.get('order')),
+              course: course.id,
+              videoUrl: fd.get('videoUrl'),
+              attachments: fd.get('attachments') ? fd.get('attachments').split(',').map(s=>s.trim()).filter(Boolean) : [],
+              duration: fd.get('duration') ? Number(fd.get('duration')) : undefined
+            };
+            const r = await fetch('/api/lessons', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+            const res = document.getElementById('createLessonResult');
+            if (r.ok) { res.innerHTML = '<p>Lesson created.</p>'; e.target.reset(); showLessons(course, me); } else { res.innerHTML = '<p class="error">Failed to create</p>'; }
+          });
+        }
+      }
+
+      function renderLessons(lessons, me, course) {
+        if (!lessons || lessons.length === 0) return '<p>No lessons found.</p>';
+        return `
+          <table>
+            <thead><tr><th>Order</th><th>Title</th><th>Type</th><th>Actions</th></tr></thead>
+            <tbody>
+              ${lessons.map(l => `
+                <tr>
+                  <td>${escape(l.order)}</td>
+                  <td>${escape(l.title)}</td>
+                  <td>${escape(l.type)}</td>
+                  <td>${canEditLesson(l, me) ? `<button onclick="editLesson('${l._id}','${course.id}')">Edit</button> <button onclick="deleteLesson('${l._id}','${course.id}')">Delete</button>` : 'N/A'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+
+      function canEditLesson(lesson, me) {
+        return me.role === 'admin' || String(lesson.owner) === String(me.id);
+      }
+
+      window.editLesson = async function(lessonId, courseId) {
+        const r = await fetch(`/api/lessons/${lessonId}`);
+        if (!r.ok) return alert('Lesson not found');
+        const lesson = await r.json();
+        const title = prompt('Lesson title:', lesson.title);
+        if (title === null) return;
+        const content = prompt('Content:', lesson.content);
+        const type = prompt('Type (text,video,document,quiz):', lesson.type);
+        const order = prompt('Order:', lesson.order);
+        const videoUrl = prompt('Video URL:', lesson.videoUrl||'');
+        const attachments = prompt('Attachments (comma separated URLs):', (lesson.attachments||[]).join(','));
+        const duration = prompt('Duration (min):', lesson.duration||'');
+        const body = { title, content, type, order:Number(order), videoUrl, attachments:attachments?attachments.split(',').map(s=>s.trim()).filter(Boolean):[], duration:duration?Number(duration):undefined };
+        const resp = await fetch(`/api/lessons/${lessonId}`, { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+        if (resp.ok) { alert('Updated'); showLessons({id:courseId}, {id:lesson.owner,role:'admin'}); } else { alert('Failed'); }
+      }
+
+      window.deleteLesson = async function(lessonId, courseId) {
+        if (!confirm('Delete this lesson?')) return;
+        const r = await fetch(`/api/lessons/${lessonId}`, { method: 'DELETE' });
+        if (r.ok) { alert('Deleted'); showLessons({id:courseId}, {id:''}); } else { alert('Failed'); }
+      }
 
     function escape(s){ return String(s||'').replace(/[&<>"']/g, function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[ch];}); }
 

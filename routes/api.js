@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const Course = require('../models/course');
 const ensureAuth = require('../middleware/auth');
+const Lesson = require('../models/lesson');
 
 function isAdmin(req) {
     return req.user && req.user.role === 'admin';
@@ -131,6 +132,73 @@ router.delete('/courses/:id', ensureAuth, async (req, res) => {
 });
 
 module.exports = router;
+
+// --- Lessons CRUD ---
+// GET /api/lessons?course=courseId - получить все уроки курса (teacher/admin только свои)
+router.get('/lessons', ensureAuth, async (req, res) => {
+    try {
+        const { course } = req.query;
+        if (!course) return res.status(400).json({ error: 'Course id required' });
+        let filter = { course };
+        if (req.user.role === 'teacher') filter.owner = req.user._id;
+        const lessons = await Lesson.find(filter).sort('order');
+        res.json(lessons);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/lessons/:id - получить урок
+router.get('/lessons/:id', ensureAuth, async (req, res) => {
+    try {
+        const lesson = await Lesson.findById(req.params.id);
+        if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
+        // Только владелец или админ
+        if (req.user.role !== 'admin' && String(lesson.owner) !== String(req.user._id)) return res.status(403).json({ error: 'Forbidden' });
+        res.json(lesson);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/lessons - создать урок (только teacher/admin)
+router.post('/lessons', ensureAuth, async (req, res) => {
+    try {
+        if (req.user.role !== 'teacher' && req.user.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
+        const { title, content, type, order, course, videoUrl, attachments, duration } = req.body;
+        if (!title || !content || !course || order === undefined) return res.status(400).json({ error: 'Missing fields' });
+        const lesson = new Lesson({ title, content, type, order, course, owner: req.user._id, videoUrl, attachments, duration });
+        await lesson.save();
+        res.status(201).json(lesson);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// PUT /api/lessons/:id - обновить урок (только owner/admin)
+router.put('/lessons/:id', ensureAuth, async (req, res) => {
+    try {
+        const lesson = await Lesson.findById(req.params.id);
+        if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
+        if (req.user.role !== 'admin' && String(lesson.owner) !== String(req.user._id)) return res.status(403).json({ error: 'Forbidden' });
+        const { title, content, type, order, videoUrl, attachments, duration, isPublished } = req.body;
+        if (title) lesson.title = title;
+        if (content) lesson.content = content;
+        if (type) lesson.type = type;
+        if (order !== undefined) lesson.order = order;
+        if (videoUrl) lesson.videoUrl = videoUrl;
+        if (attachments) lesson.attachments = attachments;
+        if (duration) lesson.duration = duration;
+        if (isPublished !== undefined) lesson.isPublished = isPublished;
+        await lesson.save();
+        res.json(lesson);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// DELETE /api/lessons/:id - удалить урок (owner/admin)
+router.delete('/lessons/:id', ensureAuth, async (req, res) => {
+    try {
+        const lesson = await Lesson.findById(req.params.id);
+        if (!lesson) return res.status(404).json({ error: 'Lesson not found' });
+        if (req.user.role !== 'admin' && String(lesson.owner) !== String(req.user._id)) return res.status(403).json({ error: 'Forbidden' });
+        await lesson.remove();
+        res.json({ ok: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
 
 // GET /api/me - return current logged-in user (without password)
 router.get('/me', ensureAuth, (req, res) => {
