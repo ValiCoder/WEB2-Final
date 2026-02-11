@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lectures - LearniX</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/lectures.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">LearniX</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="courses.html">Courses</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="lectures.html">Lectures</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="quiz.html">Quiz</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="profile.html">Profile</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Web Development Fundamentals</h2>
+            <div class="progress" style="width: 200px;">
+                <div class="progress-bar" role="progressbar" style="width: 30%">30% Complete</div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Course Content</h5>
+                    </div>
+                    <div class="list-group list-group-flush" id="lectureList">
+                        <a href="#" class="list-group-item list-group-item-action active" data-lecture="1">
+                            <div class="d-flex w-100 justify-content-between">
+                                <span>Introduction to HTML</span>
+                                <small><i class="bi bi-check-circle-fill text-success"></i></small>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" data-lecture="2">
+                            <div class="d-flex w-100 justify-content-between">
+                                <span>CSS Basics</span>
+                                <small><i class="bi bi-circle"></i></small>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" data-lecture="3">
+                            <div class="d-flex w-100 justify-content-between">
+                                <span>JavaScript Fundamentals</span>
+                                <small><i class="bi bi-circle"></i></small>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" data-lecture="4">
+                            <div class="d-flex w-100 justify-content-between">
+                                <span>Responsive Design</span>
+                                <small><i class="bi bi-circle"></i></small>
+                            </div>
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" data-lecture="5">
+                            <div class="d-flex w-100 justify-content-between">
+                                <span>Project: Personal Portfolio</span>
+                                <small><i class="bi bi-circle"></i></small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="card lecture-content">
+                    <div class="card-body">
+                        <h4 class="card-title" id="lectureTitle">Introduction to HTML</h4>
+                        <div id="lectureContent">
+                            <p>HTML (HyperText Markup Language) is the standard markup language for documents designed to be displayed in a web browser.</p>
+                            
+                            <h5>Basic HTML Structure</h5>
+                            <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Page Title&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;My First Heading&lt;/h1&gt;
+    &lt;p&gt;My first paragraph.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                            
+                            <h5>Common HTML Elements</h5>
+                            <ul>
+                                <li><strong>&lt;h1&gt; to &lt;h6&gt;</strong>: Headings</li>
+                                <li><strong>&lt;p&gt;</strong>: Paragraphs</li>
+                                <li><strong>&lt;a&gt;</strong>: Links</li>
+                                <li><strong>&lt;img&gt;</strong>: Images</li>
+                                <li><strong>&lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;</strong>: Lists</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button class="btn btn-secondary" id="prevLecture">Previous</button>
+                            <div>
+                                <button class="btn btn-outline-primary me-2" id="markComplete">Mark Complete</button>
+                                <a href="quiz.html" class="btn btn-primary">Take Quiz</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>LearniX</h5>
+                    <p>Your online learning platform for skill development and knowledge enhancement.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="courses.html">Courses</a></li>
+                        <li><a href="profile.html">My Profile</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li>Email: info@learnix.com</li>
+                        <li>Phone: +7 007 000 00 00</li>
+                        <li>Address: Street, City</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p>&copy; 2025 LearniX. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/lectures.js"></script>
+</body>
+</html>

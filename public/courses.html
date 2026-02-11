@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courses - LearniX</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/courses.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">LearniX</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="courses.html">Courses</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="lectures.html">Lectures</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="quiz.html">Quiz</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="profile.html">Profile</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h2 class="mb-4">Available Courses</h2>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search courses..." id="courseSearch">
+                    <button class="btn btn-outline-secondary" type="button" id="searchButton">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <select class="form-select" id="categoryFilter">
+                    <option value="all">All Categories</option>
+                    <option value="web">Web Development</option>
+                    <option value="data">Data Science</option>
+                    <option value="marketing">Digital Marketing</option>
+                    <option value="mobile">Mobile Development</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="row" id="coursesContainer">
+            <div class="col-md-6">
+                <div class="card course-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Web Development Fundamentals</h5>
+                        <p class="card-text">Learn HTML, CSS, and JavaScript to build modern websites.</p>
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" style="width: 30%">30% Complete</div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="badge bg-primary">Web Development</span>
+                            <a href="lectures.html" class="btn btn-primary">Continue Learning</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card course-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Data Science Essentials</h5>
+                        <p class="card-text">Introduction to data analysis, visualization, and machine learning.</p>
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" style="width: 65%">65% Complete</div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="badge bg-success">Data Science</span>
+                            <a href="lectures.html" class="btn btn-primary">Continue Learning</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card course-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Digital Marketing</h5>
+                        <p class="card-text">Master SEO, social media, and content marketing strategies.</p>
+                        <div class="d-flex justify-content-between">
+                            <span class="badge bg-warning text-dark">Marketing</span>
+                            <a href="lectures.html" class="btn btn-primary">Start Learning</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card course-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Mobile App Development</h5>
+                        <p class="card-text">Build cross-platform apps with React Native and Flutter.</p>
+                        <div class="d-flex justify-content-between">
+                            <span class="badge bg-info">Mobile Development</span>
+                            <a href="lectures.html" class="btn btn-primary">Start Learning</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>LearniX</h5>
+                    <p>Your online learning platform for skill development and knowledge enhancement.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="courses.html">Courses</a></li>
+                        <li><a href="profile.html">My Profile</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li>Email: info@learnix.com</li>
+                        <li>Phone: +7 007 000 00 00</li>
+                        <li>Address: Street, City</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p>&copy; 2025 LearniX. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/courses.js"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+.lecture-content {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.list-group-item.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+pre {
+    background-color: var(--input-bg);
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    color: var(--text-color);
+}
+
+code {
+    color: var(--accent-color);
+}
+
+.bi-check-circle-fill {
+    font-size: 1rem;
+}
+
+.bi-circle {
+    font-size: 1rem;
+    color: var(--muted-text);
+}

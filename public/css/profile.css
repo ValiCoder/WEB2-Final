@@ -1,0 +1,33 @@
+.user-avatar-container {
+    position: relative;
+    display: inline-block;
+}
+
+.user-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
+}
+
+.change-avatar-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.list-group-item a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.list-group-item a:hover {
+    color: var(--primary-color);
+}
